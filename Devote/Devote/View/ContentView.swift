@@ -9,6 +9,12 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
+    @State var task: String = ""
+    
+    private var isButtonDisabled: Bool {
+        task.isEmpty
+    }
+    
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
@@ -20,6 +26,9 @@ struct ContentView: View {
         withAnimation {
             let newItem = Item(context: viewContext)
             newItem.timestamp = Date()
+            newItem.task = task
+            newItem.completion = false
+            newItem.id = UUID()
 
             do {
                 try viewContext.save()
@@ -27,6 +36,9 @@ struct ContentView: View {
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
+            
+            task = ""
+            hideKeyboard()
         }
     }
 
@@ -45,23 +57,47 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+            VStack {
+                VStack {
+                    TextField("Nova Tarefa", text: $task)
+                        .padding()
+                        .background(Color(UIColor.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    
+                    Button(action: {
+                        addItem()
+                    }, label: {
+                        Spacer()
+                        Text("Salvar")
+                        Spacer()
+                    })
+                    .disabled(isButtonDisabled)
+                    .padding()
+                    .background(isButtonDisabled ? Color.gray : Color.pink)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .padding()
+                
+                List {
+                    ForEach(items) { item in
+                        VStack(alignment: .leading) {
+                            Text(item.task ?? "")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                            
+                            Text(item.timestamp!, formatter: itemFormatter)
+                                .font(.footnote)
+                                .foregroundStyle(.gray)
+                        }
                     }
+                    .onDelete(perform: deleteItems)
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                .navigationTitle("Tarefas Diárias")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        EditButton()
                     }
                 }
             }
