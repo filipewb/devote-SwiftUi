@@ -57,51 +57,52 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            ZStack {
                 VStack {
-                    TextField("Nova Tarefa", text: $task)
+                    VStack {
+                        TextField("Nova Tarefa", text: $task)
+                            .padding()
+                            .background(Color(UIColor.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
+                        Button(action: {
+                            addItem()
+                        }, label: {
+                            Spacer()
+                            Text("Salvar")
+                            Spacer()
+                        })
+                        .disabled(isButtonDisabled)
                         .padding()
-                        .background(Color(UIColor.systemGray6))
+                        .background(isButtonDisabled ? Color.gray : Color.pink)
+                        .font(.headline)
+                        .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
-                    
-                    Button(action: {
-                        addItem()
-                    }, label: {
-                        Spacer()
-                        Text("Salvar")
-                        Spacer()
-                    })
-                    .disabled(isButtonDisabled)
-                    .padding()
-                    .background(isButtonDisabled ? Color.gray : Color.pink)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .padding()
-                
-                List {
-                    ForEach(items) { item in
-                        VStack(alignment: .leading) {
-                            Text(item.task ?? "")
-                                .font(.headline)
-                                .fontWeight(.bold)
-                            
-                            Text(item.timestamp!, formatter: itemFormatter)
-                                .font(.footnote)
-                                .foregroundStyle(.gray)
-                        }
                     }
-                    .onDelete(perform: deleteItems)
-                }
-                .navigationTitle("Tarefas Diárias")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        EditButton()
+                    .padding()
+                    
+                    List {
+                        ForEach(items) { item in
+                            VStack(alignment: .leading) {
+                                Text(item.task ?? "")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                
+                                Text(item.timestamp!, formatter: itemFormatter)
+                                    .font(.footnote)
+                                    .foregroundStyle(.gray)
+                            }
+                        }
+                        .onDelete(perform: deleteItems)
+                    }
+                    .navigationTitle("Tarefas Diárias")
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            EditButton()
+                        }
                     }
                 }
             }
-            Text("Select an item")
         }
     }
 }
